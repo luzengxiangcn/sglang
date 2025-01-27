@@ -161,6 +161,7 @@ class ServerArgs:
 
     # Custom logit processor
     enable_custom_logit_processor: bool = False
+    tool_call_parser: str = None
 
     def __post_init__(self):
         # Set missing default values
@@ -317,6 +318,7 @@ class ServerArgs:
                 "dummy",
                 "gguf",
                 "bitsandbytes",
+                "layered",
             ],
             help="The format of the model weights to load. "
             '"auto" will try to load the weights in the safetensors format '
@@ -330,7 +332,10 @@ class ServerArgs:
             "which is mainly for profiling."
             '"gguf" will load the weights in the gguf format. '
             '"bitsandbytes" will load the weights using bitsandbytes '
-            "quantization.",
+            "quantization."
+            '"layered" loads weights layer by layer so that one can quantize a '
+            "layer before loading another to make the peak memory envelope "
+            "smaller.",
         )
         parser.add_argument(
             "--trust-remote-code",
@@ -872,6 +877,14 @@ class ServerArgs:
             "--enable-custom-logit-processor",
             action="store_true",
             help="Enable users to pass custom logit processors to the server (disabled by default for security)",
+        )
+        # Function Calling
+        parser.add_argument(
+            "--tool-call-parser",
+            type=str,
+            choices=["qwen25", "mistral", "llama3"],
+            default=ServerArgs.tool_call_parser,
+            help="Specify the parser for handling tool-call interactions. Options include: 'qwen25', 'mistral', and 'llama3'.",
         )
 
     @classmethod
